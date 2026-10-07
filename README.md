@@ -193,7 +193,7 @@ For banks, this shows the permanent ROE the current market price requires as wel
 
 ### SENSITIVITY ANALYSIS
 
-Provides a table that determines the master intrinsic value across negative and positive changes in cost of equity and terminal growth. The verdict uses the central 3x3 grid in this table.
+Provides a table that determines the master intrinsic value across negative and positive changes in cost of equity and terminal growth. For banks, the terminal growth axis is replaced with ROE target as RI model doesn't use terminal growth. The verdict uses the central 3x3 grid in this table.
 
 ### FINAL VERDICT
 
@@ -261,17 +261,17 @@ Data behind high-growth assumption insufficient; FCFF model inappropriate.
 | VALUATIONS:  JPMorgan Chase & Co.
 |
 |                                value  reliability  weight
-|                         ddm   179.38            0    0.0%
+|                         ddm   179.33            0    0.0%
 |                         fcfe       -            0    0.0%
-|                         ri    155.59            4  100.0%
+|                         ri    155.57            4  100.0%
 |                         fcff       -            0    0.0%
 |
 |                                      5 = Highly reliable
 |                               0 = Not reliable, Unusable
 |_________________________________________________________
 | INITIAL MODEL RESULT
-|                             Current Market Value:  331.3
-|                           Master Intrinsic Value:  155.59
+|                             Current Market Value:  331.28
+|                           Master Intrinsic Value:  155.57
 |_________________________________________________________
 | WHAT THE PRICE ASSUMES
 |
@@ -280,13 +280,13 @@ Data behind high-growth assumption insufficient; FCFF model inappropriate.
 |_________________________________________________________
 | SENSITIVITY ANALYSIS
 |
-| Terminal Growth     -1%   -0.5%     +0%   +0.5%     +1%
-| Cost of Equity                                         
-| -2%              193.78  193.78  193.78  193.78  193.78
-| -1%              172.39  172.39  172.39  172.39  172.39
-| +0%              155.59  155.59  155.59  155.59  155.59
-| +1%              145.34  145.34  145.34  145.34  145.34
-| +2%              142.21  142.21  142.21  142.21  142.21
+| ROE Target         -2%     -1%     +0%     +1%     +2%
+| Cost of Equity                                        
+| -2%             153.38  171.05  193.75  217.51  242.37
+| -1%             145.08  153.19  172.36  192.41  213.36
+| +0%             137.43  144.45  155.57  172.76  190.72
+| +1%             131.87  138.52  145.33  160.43  176.17
+| +2%             129.30  135.68  142.20  155.83  170.02
 |_________________________________________________________
 | FINAL VERDICT
 |

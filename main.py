@@ -1002,7 +1002,7 @@ def implied_roe(ticker, data, r, years_projected, price):
             
     return mid
 
-def run_ri(ticker, data, r, years_projected):
+def run_ri(ticker, data, r, years_projected, target_shift = 0):
     
     df = ri_dataframe(ticker)
     
@@ -1032,7 +1032,7 @@ def run_ri(ticker, data, r, years_projected):
     roe = df["net_income"].sum() / df["equity"].sum()
     retention = min(1, 1 - (df["dividends"].sum() + df["buybacks"].sum()) / df["net_income"].sum())
     phi = blended_phi(data)
-    roe_target = target_roe(data, r, roe)
+    roe_target = target_roe(data, r, roe) + target_shift
     
     run_residual_income = residual_income(r, book_value, roe, retention, phi, years_projected, roe_target)
     
@@ -1203,11 +1203,11 @@ def run_fcff(ticker, data, r, rf, spreads, g_L, gdp_g, years_projected):
 # MASTER INTRINSIC VALUE
 #------------------------------------------------------------------------------
 
-def master_value(ticker, data, r, rf, spreads, g_L, gdp_g, years_historical, years_projected):
+def master_value(ticker, data, r, rf, spreads, g_L, gdp_g, years_historical, years_projected, target_shift = 0):
     
     ddm_twostage, ddm_hmodel, ddm_score = run_ddm(ticker, data, r, g_L, gdp_g, years_historical, years_projected)
     fcfe_twostage, fcfe_hmodel, fcfe_score = run_fcfe(ticker, data, r, g_L, gdp_g, years_projected)
-    ri_value, ri_score = run_ri(ticker, data, r, years_projected)
+    ri_value, ri_score = run_ri(ticker, data, r, years_projected, target_shift)
     fcff_twostage, fcff_hmodel, fcff_score = run_fcff(ticker, data, r, rf, spreads, g_L, gdp_g, years_projected)
     
     ddm = mean(ddm_twostage, ddm_hmodel), ddm_score
@@ -1378,33 +1378,50 @@ def implied_growth(ticker, data, r, g_L, gdp_g, years_projected, price):
 
 def sensitivity(ticker, data, r, rf, spreads, g_L, gdp_g, years_historical, years_projected):
     
+    with contextlib.redirect_stdout(io.StringIO()):
+        _, models, _ = master_value(ticker, data, r, rf, spreads, g_L, gdp_g, years_historical, years_projected)
+
+    ri_only = models.loc["ri", "reliability"] > 0 and models.loc[["ddm", "fcfe", "fcff"], "reliability"].sum() == 0
+
+    if ri_only:
+        col_values = [-0.02, -0.01, 0, 0.01, 0.02]
+        col_name = "ROE Target"
+
+    else:
+        col_values = [-0.01, -0.005, 0, 0.005, 0.01]
+        col_name = "Terminal Growth"
+
     r_values = [-0.02, -0.01, 0, 0.01, 0.02]
-    g_L_values = [-0.01, -0.005, 0, 0.005, 0.01]
-    
+
     r_labels = []
-    g_L_labels = []
-    
+    col_labels = []
+
     for i in r_values:
         r_labels.append(f"{i * 100:+g}%")
-        
-    for i in g_L_values:
-        g_L_labels.append(f"{i * 100:+g}%")
-    
+
+    for i in col_values:
+        col_labels.append(f"{i * 100:+g}%")
+
     rows = []
-    
+
     for i in r_values:
         row = []
-        
-        for j in g_L_values:
+
+        for j in col_values:
             with contextlib.redirect_stdout(io.StringIO()):
-                value, _, _ = master_value(ticker, data, r + i, rf, spreads, g_L + j, gdp_g, years_historical, years_projected)
+                if ri_only:
+                    value, _, _ = master_value(ticker, data, r + i, rf, spreads, g_L, gdp_g, years_historical, years_projected, target_shift = j)
+
+                else:
+                    value, _, _ = master_value(ticker, data, r + i, rf, spreads, g_L + j, gdp_g, years_historical, years_projected)
+
                 row.append(value)
-            
+
         rows.append(row)
-        
-    df = pd.DataFrame(rows, index = r_labels, columns = g_L_labels).astype(float)
+
+    df = pd.DataFrame(rows, index = r_labels, columns = col_labels).astype(float)
     df.index.name = "Cost of Equity"
-    df.columns.name = "Terminal Growth"
+    df.columns.name = col_name
     
     return df
 
