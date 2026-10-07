@@ -4,11 +4,11 @@ This program is designed to allow the user to input a stock ticker, and it will 
 
 ## Overview & Motivation
 
-I made this program because I wanted to learn how to properly code in Python, not to solve any existing problem related to valuations. If you seriously want to value a company, do not use this program. Intrinsic valuation is highly company-specific and it is next to impossible to create a generalized method. Alas, it is still fun to see how the program functions and the different outputs it will generate (many outputs will say the verdict is unreliable for x reason(s)).
+I made this program because I wanted to learn how to properly code in Python, not to solve any existing problem related to valuations. If you seriously want to value a company, do not use this program. Intrinsic valuation is highly company-specific and it is next to impossible to create a generalized method. Still, it is fun to see how the program functions and the different outputs it will generate (many outputs will say the verdict is unreliable for x reason(s)).
 
 ## Installation
 
-Requires Python 3.10+ and an internet connection.
+Requires Python 3.11+ and an internet connection.
 
 ```bash
 git clone https://github.com/will3tyler/automated-valuation-model.git
@@ -23,7 +23,7 @@ On launch the program fetches live inputs from Yahoo Finance, SEC EDGAR, FRED an
 
 ## How the Program Runs
 
-1) Enter your first, last and email; the SEC requires a name and contact for any EDGAR requests.
+1) Enter your first name, last name and email; the SEC requires a name and contact for any EDGAR requests.
 
 2) Enter the ticker of whatever stock you want to evaluate. Blank input quits the loop. The program does not allow valuation of anything other than equity stocks, and within that, no REITs, companies with mismatched exchange currency and financial statement currency, stocks with insufficient price history, or stocks that are broken in yfinance.
 
@@ -31,7 +31,7 @@ On launch the program fetches live inputs from Yahoo Finance, SEC EDGAR, FRED an
 
 ## Shared Inputs and Assumptions
 
-All four models use the same cost of equity, terminal growth rate, and projection horizon (10 years).
+All four models use the same cost of equity and projection horizon (10 years). DDM, FCFE and FCFF share the same terminal growth rate.
 
 ### Required Returns
 
@@ -141,7 +141,7 @@ RI is REJECTED when:
 - Fewer than three years of data
 - Equity is negative in any year
 - Net income summed is zero or negative
-- Shares outstanding is missing
+- Shares outstanding are missing
 - The value comes out negative
 
 RI Scoring Criteria:
@@ -162,7 +162,8 @@ FCFF is REJECTED when:
 - Any of the cash flow, capex, EBIT or invested capital rows are missing
 - Fewer than three years of data
 - After-tax operating profit summed is zero or negative
-- Shares outstanding is missing
+- Average FCFF is zero or negative
+- Shares outstanding are missing
 - Market capitalization is missing
 - Terminal growth reaches WACC
 - The value comes out negative after subtracting debt
@@ -185,9 +186,9 @@ Provides a table with each model, its calculated intrinsic value, reliability, a
 
 Provides the weighted master intrinsic value as well as the current market price.
 
-### WHAT THE PRICE ASSUMES
+### CURRENT MARKET PRICE ASSUMPTIONS
 
-Shows the ten-year FCFE growth the current market price requires, the growth the model used, and the share of 1,154 large companies that grew that fast.
+Shows the ten-year FCFE growth the current market price requires, the growth the model used, and the share of 1,154 ten-year periods at 227 large companies that grew that fast.
 
 For banks, this shows the permanent ROE the current market price requires as well as the four-year ROE and long-run median ROE.
 
@@ -215,41 +216,41 @@ States whether the current market price is above, below, or within the model's r
 ```
 Stock Ticker: KO
 
- _________________________________________________________
-| VALUATIONS:  The Coca-Cola Company
-|
-|                               value  reliability  weight
-|                         ddm   67.20            5  55.56%
-|                         fcfe  73.26            3  33.33%
-|                         ri    28.67            0    0.0%
-|                         fcff  72.49            1  11.11%
-|
-|                                      5 = Highly reliable
-|                               0 = Not reliable, Unusable
-|_________________________________________________________
-| INITIAL MODEL RESULT
-|                             Current Market Value:  86.17
-|                           Master Intrinsic Value:  69.8
-|_________________________________________________________
-| WHAT THE PRICE ASSUMES
-|
-| Market price implies FCFE growth of 8.4%. Model uses 6.3%.
-| Of 1154 large companies 2010 - 2016, 45% grew that fast.
-|_________________________________________________________
-| SENSITIVITY ANALYSIS
-|
-| Terminal Growth     -1%   -0.5%     +0%   +0.5%     +1%
-| Cost of Equity                                         
-| -2%              105.91  132.07  178.64  285.05  798.19
-| -1%               73.53   84.61  100.58  125.62  170.57
-| +0%               56.16   62.07   69.80   80.35   95.60
-| +1%               45.34   48.92   53.34   58.95   66.30
-| +2%               37.95   40.29   43.09   46.48   50.67
-|_________________________________________________________
-| FINAL VERDICT
-|
-|  Values in the 3x3 sensitivity range straddle the market price.
-|  VERDICT: Model cannot distinguish price from fair value.
+_________________________________________________________
+VALUATIONS:  The Coca-Cola Company
+
+                               value  reliability  weight
+                         ddm   67.03            5  55.56%
+                         fcfe  73.08            3  33.33%
+                         ri    28.64            0    0.0%
+                         fcff  72.31            1  11.11%
+
+                                      5 = Highly reliable
+                               0 = Not reliable, Unusable
+_________________________________________________________
+INITIAL MODEL RESULT
+                             Current Market Value:  85.82
+                           Master Intrinsic Value:  69.64
+_________________________________________________________
+CURRENT MARKET PRICE ASSUMPTIONS
+
+Market price implies FCFE growth of 8.4%. Model uses 6.3%.
+Of 1154 ten-year periods at 227 large companies (2010 - 2016), 45% grew that fast.
+_________________________________________________________
+SENSITIVITY ANALYSIS
+
+Terminal Growth     -1%   -0.5%     +0%   +0.5%     +1%
+Cost of Equity                                         
+-2%              105.54  131.48  177.54  282.19  774.22
+-1%               73.35   84.37  100.23  125.06  169.52
++0%               56.06   61.94   69.64   80.12   95.27
++1%               45.27   48.84   53.24   58.83   66.14
++2%               37.90   40.24   43.02   46.40   50.58
+_________________________________________________________
+FINAL VERDICT
+
+Values in the 3x3 sensitivity range straddle the market price.
+VERDICT: Model cannot distinguish price from fair value.
 ```
 
 ```
@@ -257,44 +258,44 @@ Stock Ticker: JPM
 
 Data behind high-growth assumption insufficient; FCFE model inappropriate.
 Data behind high-growth assumption insufficient; FCFF model inappropriate.
- _________________________________________________________
-| VALUATIONS:  JPMorgan Chase & Co.
-|
-|                                value  reliability  weight
-|                         ddm   179.33            0    0.0%
-|                         fcfe       -            0    0.0%
-|                         ri    155.57            4  100.0%
-|                         fcff       -            0    0.0%
-|
-|                                      5 = Highly reliable
-|                               0 = Not reliable, Unusable
-|_________________________________________________________
-| INITIAL MODEL RESULT
-|                             Current Market Value:  331.28
-|                           Master Intrinsic Value:  155.57
-|_________________________________________________________
-| WHAT THE PRICE ASSUMES
-|
-| Market price implies a permanent ROE of 17.7%.
-| ROE last 4 years is 15.9%; median ROE over 18 years is 9.7%.
-|_________________________________________________________
-| SENSITIVITY ANALYSIS
-|
-| ROE Target         -2%     -1%     +0%     +1%     +2%
-| Cost of Equity                                        
-| -2%             153.38  171.05  193.75  217.51  242.37
-| -1%             145.08  153.19  172.36  192.41  213.36
-| +0%             137.43  144.45  155.57  172.76  190.72
-| +1%             131.87  138.52  145.33  160.43  176.17
-| +2%             129.30  135.68  142.20  155.83  170.02
-|_________________________________________________________
-| FINAL VERDICT
-|
-|  Every value in the 3x3 sensitivity range is below the market price.
-|  VERDICT: Price is above the model's range (OVERVALUED)
-|
-|                       VERDICT IS UNRELIABLE. REASON(S):
-|  Recent ROE of 15.9% is well above long-run target of 9.4%; value too sensitive to ROE persistence.
+_________________________________________________________
+VALUATIONS:  JPMorgan Chase & Co.
+
+                                value  reliability  weight
+                         ddm   178.97            0    0.0%
+                         fcfe       -            0    0.0%
+                         ri    155.44            4  100.0%
+                         fcff       -            0    0.0%
+
+                                      5 = Highly reliable
+                               0 = Not reliable, Unusable
+_________________________________________________________
+INITIAL MODEL RESULT
+                             Current Market Value:  329.58
+                           Master Intrinsic Value:  155.44
+_________________________________________________________
+CURRENT MARKET PRICE ASSUMPTIONS
+
+Market price implies a permanent ROE of 17.7%.
+ROE last 4 years is 15.9%; median ROE over 18 years is 9.7%.
+_________________________________________________________
+SENSITIVITY ANALYSIS
+
+ROE Target         -2%     -1%     +0%     +1%     +2%
+Cost of Equity                                        
+-2%             153.31  170.88  193.55  217.28  242.10
+-1%             145.01  153.06  172.21  192.23  213.15
++0%             137.37  144.38  155.44  172.62  190.55
++1%             131.85  138.50  145.31  160.39  176.12
++2%             129.28  135.66  142.18  155.79  169.97
+_________________________________________________________
+FINAL VERDICT
+
+Every value in the 3x3 sensitivity range is below the market price.
+VERDICT: Price is above the model's range (OVERVALUED)
+
+                       VERDICT IS UNRELIABLE. REASON(S):
+Recent ROE of 15.9% is well above long-run target of 9.4%; value too sensitive to ROE persistence.
 ```
 
 ## Known Limitations
@@ -313,28 +314,34 @@ Scores are pass/fail on all models, so anything that's a near miss is a full mis
 
 ## Project Files
 
-main.py - the program
-base_rates.csv - 1,154 realised ten-year earnings growth rates from SEC filings
-requirements.txt - list of python packages the program needs
-LICENSE - MIT License
+- main.py - runs the program: inputs, ticker prompt, printed results
+- helpers.py - small, reusable functions: CAGR, regression slope, smoothing, base roll-forward
+- data.py - loads necessary data: Yahoo dividends, Damodaran tables, SEC EDGAR
+- rates.py - discount rate contributors: cost of equity (CAPM), cost of debt, cost of preferred, tax rate, WACC
+- growth.py - growth inputs: ROE fade, terminal growth, near-term growth
+- formulas.py - two-stage model, H-model, residual income formulas
+- models.py - runs the four models with their rejection checks and scored criteria
+- output.py - master value, warnings, what the market price assumes, sensitivity table, verdict
+- base_rates.csv - 1,154 realized ten-year earnings growth rates from SEC filings
+- requirements.txt - list of python packages the program needs
+- LICENSE - MIT License
 
 ## Data Sources
 
-Yahoo Finance, via the yfinance package: prices, dividends, and the last four years of financial statements.
-github.com/ranaroussi/yfinance
+- Yahoo Finance, via the yfinance package: prices, dividends, and the last four years of financial statements. https://github.com/ranaroussi/yfinance
 
-SEC EDGAR, companyfacts API: long filing histories (ROE persistence, target ROE, revenue growth).
-sec.gov/edgar/sec-api-documentation
-Ticker-to-CIK map: sec.gov/files/company_tickers.json
+- SEC EDGAR, companyfacts API: long filing histories (ROE persistence, target ROE, revenue growth).
+https://sec.gov/edgar/sec-api-documentation
+Ticker-to-CIK map: https://sec.gov/files/company_tickers.json
 
-FRED (Federal Reserve Bank of St. Louis): nominal GDP, for the 30-year growth anchor.
-fred.stlouisfed.org/series/GDP
+- FRED (Federal Reserve Bank of St. Louis): nominal GDP, for the 30-year growth anchor.
+https://fred.stlouisfed.org/series/GDP
 
-Damodaran Online (NYU Stern): credit spreads by interest coverage, and the implied equity risk premium.
-Spreads: pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ratings.html
-Implied ERP (monthly): pages.stern.nyu.edu/~adamodar/pc/implprem/ERPbymonth.xlsx
+- Damodaran Online (NYU Stern): credit spreads by interest coverage, and the implied equity risk premium.
+Spreads: https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ratings.html
+Implied ERP (monthly): https://pages.stern.nyu.edu/~adamodar/pc/implprem/ERPbymonth.xlsx
 
-Base rates: 1,154 realized ten-year earnings growth rates, built from EDGAR filings of 227 large US companies (start years 2010 to 2016). Included as base_rates.csv.
+- Base rates: 1,154 realized ten-year earnings growth rates, built from EDGAR filings of 227 large US companies (start years 2010 to 2016). Included as base_rates.csv.
 
 ## Disclaimer
 
@@ -343,4 +350,5 @@ This program is a learning project. Nothing it outputs is investment advice, and
 ## Contact
 
 Name: William Tyler
+
 LinkedIn: www.linkedin.com/in/willtylerfinance
