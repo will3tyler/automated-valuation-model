@@ -35,7 +35,7 @@ while email == "":
 HEADERS = {"User-Agent": f"{first_last} {email}"}
 market = yf.Ticker("^GSPC")
 tnx = yf.Ticker("^TNX")
-rf = tnx.history(period="5d")["Close"].iloc[-1]/100
+rf = tnx.history(period="5d")["Close"].dropna().iloc[-1]/100
 years_historical = 5
 years_projected = 10
 gdp_years = 30
@@ -100,7 +100,7 @@ while True:
         
         data = edgar_rawdata(ticker, ciks, HEADERS)
         g_L = terminal_growth(ticker, data, r, rf, gdp_g, years_projected)
-        price = ticker.history(period = "5d")["Close"].iloc[-1]
+        price = ticker.history(period = "5d")["Close"].dropna().iloc[-1]
         name = ticker.info.get("longName", symbol)
     
         break
